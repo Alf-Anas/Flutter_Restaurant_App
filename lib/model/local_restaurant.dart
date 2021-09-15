@@ -67,7 +67,7 @@ Future<List<Restaurant>> listRestaurant() async {
         description: restaurant['description'],
         pictureId: restaurant['pictureId'],
         city: restaurant['city'],
-        rating: restaurant['rating'],
+        rating: restaurant['rating'].toDouble(),
         menus: getMenus(restaurant['menus']));
     _restaurantList.add(_restaurant);
   }
