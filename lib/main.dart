@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:restaurant_app/provider/restaurant_provider.dart';
 import 'package:restaurant_app/screen/home.dart';
 import 'package:restaurant_app/screen/splash.dart';
 import 'package:restaurant_app/values/strings.dart';
 import 'package:restaurant_app/values/colors.dart';
+import 'api/api_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,7 +28,12 @@ class MyApp extends StatelessWidget {
       initialRoute: RouteList.splash,
       routes: {
         RouteList.splash: (context) => const SplashPage(),
-        RouteList.home: (context) => const HomePage(),
+        RouteList.home: (context) => ChangeNotifierProvider<RestaurantProvider>(
+              create: (_) => RestaurantProvider(
+                apiService: ApiService(),
+              ),
+              child: const HomePage(),
+            ),
       },
     );
   }

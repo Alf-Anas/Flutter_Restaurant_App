@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_app/model/local_restaurant.dart';
+import 'package:restaurant_app/api/api_service.dart';
+import 'package:restaurant_app/model/restaurant.dart';
 import 'package:restaurant_app/values/strings.dart';
 
 class DetailPage extends StatelessWidget {
@@ -16,9 +17,11 @@ class DetailPage extends StatelessWidget {
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           if (constraints.maxWidth > 800) {
-            return DetailWebPage(restaurant: restaurant);
+            return DetailWebPage(
+                restaurant: RestaurantDetail.fromRestaurant(restaurant));
           } else {
-            return DetailMobilePage(restaurant: restaurant);
+            return DetailMobilePage(
+                restaurant: RestaurantDetail.fromRestaurant(restaurant));
           }
         },
       ),
@@ -27,7 +30,7 @@ class DetailPage extends StatelessWidget {
 }
 
 class DetailWebPage extends StatefulWidget {
-  final Restaurant restaurant;
+  final RestaurantDetail restaurant;
 
   const DetailWebPage({Key? key, required this.restaurant}) : super(key: key);
 
@@ -37,9 +40,20 @@ class DetailWebPage extends StatefulWidget {
 
 class _DetailWebPageState extends State<DetailWebPage> {
   final _scrollController = ScrollController();
+  late RestaurantDetail _restaurantDetail;
+  bool dataLoaded = false;
 
   @override
   Widget build(BuildContext context) {
+    if (!dataLoaded) {
+      _restaurantDetail = widget.restaurant;
+      ApiService()
+          .restaurantDetail(widget.restaurant.id)
+          .then((val) => setState(() {
+                dataLoaded = true;
+                _restaurantDetail = val;
+              }));
+    }
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -51,14 +65,14 @@ class _DetailWebPageState extends State<DetailWebPage> {
                 GestureDetector(
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(builder: (_) {
-                      return FullScreenImage(path: widget.restaurant.pictureId);
+                      return FullScreenImage(path: _restaurantDetail.pictureId);
                     }));
                   },
                   child: SizedBox(
                     height: 150,
                     child: Hero(
-                      tag: 'tag_${widget.restaurant.id}',
-                      child: Image.network(widget.restaurant.pictureId),
+                      tag: 'tag_${_restaurantDetail.id}',
+                      child: Image.network(_restaurantDetail.pictureId),
                     ),
                   ),
                 ),
@@ -85,7 +99,7 @@ class _DetailWebPageState extends State<DetailWebPage> {
                               fontSize: 16, fontWeight: FontWeight.bold)),
                     )),
                   ],
-                  rows: getMenusRow(widget.restaurant.menus),
+                  rows: getMenusRow(_restaurantDetail.menus),
                 ),
                 Flexible(
                   child: Container(
@@ -93,9 +107,9 @@ class _DetailWebPageState extends State<DetailWebPage> {
                     child: Column(
                       children: [
                         Text(
-                          widget.restaurant.name +
+                          _restaurantDetail.name +
                               " *" +
-                              widget.restaurant.rating.toString(),
+                              _restaurantDetail.rating.toString(),
                           textAlign: TextAlign.start,
                           style: const TextStyle(
                             fontSize: 18.0,
@@ -103,16 +117,23 @@ class _DetailWebPageState extends State<DetailWebPage> {
                           ),
                         ),
                         Text(
-                          widget.restaurant.city,
+                          _restaurantDetail.city,
                           textAlign: TextAlign.start,
                           style: const TextStyle(
                             fontSize: 16.0,
                           ),
                         ),
+                        Text(
+                          "> " + _restaurantDetail.categories.join(", ") + " <",
+                          textAlign: TextAlign.start,
+                          style: const TextStyle(
+                            fontSize: 14.0,
+                          ),
+                        ),
                         Padding(
                           padding: const EdgeInsets.only(top: 16.0),
                           child: Text(
-                            widget.restaurant.description,
+                            _restaurantDetail.description,
                             textAlign: TextAlign.justify,
                             style: const TextStyle(
                               fontSize: 16.0,
@@ -159,7 +180,7 @@ class _DetailWebPageState extends State<DetailWebPage> {
 }
 
 class DetailMobilePage extends StatefulWidget {
-  final Restaurant restaurant;
+  final RestaurantDetail restaurant;
 
   const DetailMobilePage({Key? key, required this.restaurant})
       : super(key: key);
@@ -170,9 +191,20 @@ class DetailMobilePage extends StatefulWidget {
 
 class _DetailMobilePageState extends State<DetailMobilePage> {
   final _scrollController = ScrollController();
+  late RestaurantDetail _restaurantDetail;
+  bool dataLoaded = false;
 
   @override
   Widget build(BuildContext context) {
+    if (!dataLoaded) {
+      _restaurantDetail = widget.restaurant;
+      ApiService()
+          .restaurantDetail(widget.restaurant.id)
+          .then((val) => setState(() {
+                dataLoaded = true;
+                _restaurantDetail = val;
+              }));
+    }
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -181,14 +213,14 @@ class _DetailMobilePageState extends State<DetailMobilePage> {
             GestureDetector(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) {
-                  return FullScreenImage(path: widget.restaurant.pictureId);
+                  return FullScreenImage(path: _restaurantDetail.pictureId);
                 }));
               },
               child: SizedBox(
                 height: 150,
                 child: Hero(
-                  tag: 'tag_${widget.restaurant.id}',
-                  child: Image.network(widget.restaurant.pictureId),
+                  tag: 'tag_${_restaurantDetail.id}',
+                  child: Image.network(_restaurantDetail.pictureId),
                 ),
               ),
             ),
@@ -198,24 +230,30 @@ class _DetailMobilePageState extends State<DetailMobilePage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    widget.restaurant.name +
+                    _restaurantDetail.name +
                         " *" +
-                        widget.restaurant.rating.toString(),
+                        _restaurantDetail.rating.toString(),
                     style: const TextStyle(
                       fontSize: 18.0,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    widget.restaurant.city,
+                    _restaurantDetail.city,
                     style: const TextStyle(
                       fontSize: 16.0,
+                    ),
+                  ),
+                  Text(
+                    "> " + _restaurantDetail.categories.join(", "),
+                    style: const TextStyle(
+                      fontSize: 14.0,
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0, bottom: 24),
                     child: Text(
-                      widget.restaurant.description,
+                      _restaurantDetail.description,
                       textAlign: TextAlign.justify,
                       style: const TextStyle(
                         fontSize: 16.0,
@@ -248,7 +286,7 @@ class _DetailMobilePageState extends State<DetailMobilePage> {
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 )),
               ],
-              rows: getMenusRow(widget.restaurant.menus),
+              rows: getMenusRow(_restaurantDetail.menus),
             ),
           ],
         ),

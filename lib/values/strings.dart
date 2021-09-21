@@ -4,6 +4,12 @@ class StrList {
   static const String menu = "Menu";
   static const String foods = "Foods";
   static const String drinks = "Drinks";
+  static const String search = "Search...";
+  static const String failedListRestaurant = "Failed to Load List Restaurant";
+  static const String failedDetailRestaurant =
+      "Failed to Load Detail Restaurant";
+  static const String emptyData = "Data Not Found";
+  static const String error = "Error -->";
 }
 
 class RouteList {
