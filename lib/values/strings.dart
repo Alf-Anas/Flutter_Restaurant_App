@@ -5,9 +5,10 @@ class StrList {
   static const String foods = "Foods";
   static const String drinks = "Drinks";
   static const String search = "Search...";
-  static const String failedListRestaurant = "Failed to Load List Restaurant";
+  static const String failedListRestaurant =
+      "Failed to load list restaurant, please check your internet connection!";
   static const String failedDetailRestaurant =
-      "Failed to Load Detail Restaurant";
+      "Failed to load detail restaurant, please check your internet connection!";
   static const String emptyData = "Data Not Found";
   static const String error = "Error -->";
 }

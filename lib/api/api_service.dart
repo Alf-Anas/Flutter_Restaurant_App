@@ -7,7 +7,9 @@ class ApiService {
   static const String _baseUrl = 'https://restaurant-api.dicoding.dev/';
 
   Future<ListRestaurant> listRestaurant(String query) async {
-    final response = await http.get(Uri.parse(_baseUrl + "search?q=" + query));
+    final response = await http
+        .get(Uri.parse(_baseUrl + "search?q=" + query))
+        .timeout(const Duration(seconds: 10));
     if (response.statusCode == 200) {
       return ListRestaurant.fromJson(json.decode(response.body));
     } else {
@@ -16,11 +18,17 @@ class ApiService {
   }
 
   Future<RestaurantDetail> restaurantDetail(String id) async {
-    final response = await http.get(Uri.parse(_baseUrl + "detail/" + id));
-    if (response.statusCode == 200) {
-      return RestaurantDetail.fromJson(
-          json.decode(response.body)['restaurant']);
-    } else {
+    try {
+      final response = await http
+          .get(Uri.parse(_baseUrl + "detail/" + id))
+          .timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        return RestaurantDetail.fromJson(
+            json.decode(response.body)['restaurant']);
+      } else {
+        throw Exception(StrList.failedDetailRestaurant);
+      }
+    } catch (err) {
       throw Exception(StrList.failedDetailRestaurant);
     }
   }
