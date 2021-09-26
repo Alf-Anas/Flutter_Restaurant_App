@@ -1,32 +1,100 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_app/api/api_service.dart';
 import 'package:restaurant_app/model/restaurant.dart';
+import 'package:restaurant_app/utils/database_helper.dart';
+import 'package:restaurant_app/values/colors.dart';
 import 'package:restaurant_app/values/strings.dart';
 
-class DetailPage extends StatelessWidget {
+class DetailPage extends StatefulWidget {
   final Restaurant restaurant;
 
   const DetailPage({Key? key, required this.restaurant}) : super(key: key);
 
   @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  bool isBookmark = false;
+  late RestaurantDetail _restaurantDetail;
+  bool dataLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    void getFavorited() async {
+      var favoriteData =
+          await DatabaseHelper().getFavoriteByID(widget.restaurant.id);
+      if (favoriteData["id"] == widget.restaurant.id) {
+        setState(() {
+          isBookmark = true;
+        });
+      }
+    }
+
+    getFavorited();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!dataLoaded) {
+      _restaurantDetail = RestaurantDetail.fromRestaurant(widget.restaurant);
+      ApiService()
+          .restaurantDetail(widget.restaurant.id)
+          .then((val) => setState(() {
+                dataLoaded = true;
+                _restaurantDetail = val;
+              }));
+    }
     return Scaffold(
       appBar: AppBar(
-        title: Text(restaurant.name),
+        title: Text(widget.restaurant.name),
       ),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           if (constraints.maxWidth > 800) {
-            return DetailWebPage(
-                restaurant: RestaurantDetail.fromRestaurant(restaurant));
+            return DetailWebPage(restaurant: _restaurantDetail);
           } else {
-            return DetailMobilePage(
-                restaurant: RestaurantDetail.fromRestaurant(restaurant));
+            return DetailMobilePage(restaurant: _restaurantDetail);
           }
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        child: isBookmarked(isBookmark),
+        backgroundColor: ColorList.backgroundColor,
+        foregroundColor: Colors.pink,
+        onPressed: () {
+          if (isBookmark) {
+            void deleteFavorite() async {
+              await DatabaseHelper().removeFavorite(widget.restaurant.id);
+              setState(() {
+                isBookmark = false;
+              });
+            }
+
+            deleteFavorite();
+          } else {
+            void addFavorite() async {
+              await DatabaseHelper().insertFavorite(widget.restaurant);
+              setState(() {
+                isBookmark = true;
+              });
+            }
+
+            addFavorite();
+          }
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
+}
+
+Icon isBookmarked(bool isBookmark) {
+  if (isBookmark) {
+    return const Icon(Icons.star);
+  }
+  return const Icon(Icons.star_border);
 }
 
 class DetailWebPage extends StatefulWidget {
@@ -41,19 +109,10 @@ class DetailWebPage extends StatefulWidget {
 class _DetailWebPageState extends State<DetailWebPage> {
   final _scrollController = ScrollController();
   late RestaurantDetail _restaurantDetail;
-  bool dataLoaded = false;
 
   @override
   Widget build(BuildContext context) {
-    if (!dataLoaded) {
-      _restaurantDetail = widget.restaurant;
-      ApiService()
-          .restaurantDetail(widget.restaurant.id)
-          .then((val) => setState(() {
-                dataLoaded = true;
-                _restaurantDetail = val;
-              }));
-    }
+    _restaurantDetail = widget.restaurant;
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -192,19 +251,10 @@ class DetailMobilePage extends StatefulWidget {
 class _DetailMobilePageState extends State<DetailMobilePage> {
   final _scrollController = ScrollController();
   late RestaurantDetail _restaurantDetail;
-  bool dataLoaded = false;
 
   @override
   Widget build(BuildContext context) {
-    if (!dataLoaded) {
-      _restaurantDetail = widget.restaurant;
-      ApiService()
-          .restaurantDetail(widget.restaurant.id)
-          .then((val) => setState(() {
-                dataLoaded = true;
-                _restaurantDetail = val;
-              }));
-    }
+    _restaurantDetail = widget.restaurant;
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(

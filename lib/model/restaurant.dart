@@ -15,6 +15,12 @@ class ListRestaurant {
         restaurants: List<Restaurant>.from(
             (json["restaurants"] as List).map((x) => Restaurant.fromJson(x))),
       );
+
+  Map<String, dynamic> toJson() => {
+        "error": error,
+        "founded": founded,
+        "articles": List<dynamic>.from(restaurants.map((x) => x.toJson())),
+      };
 }
 
 class Restaurant {
@@ -43,6 +49,16 @@ class Restaurant {
         city: json["city"],
         rating: json["rating"].toDouble(),
       );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "description": description,
+        "pictureId": pictureId.replaceFirst(
+            'https://restaurant-api.dicoding.dev/images/medium/', ''),
+        "city": city,
+        "rating": rating.toDouble(),
+      };
 }
 
 class Menus {
@@ -91,6 +107,18 @@ class RestaurantDetail {
         categories: getItem(json["categories"]),
         menus: getMenus(json['menus']),
       );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "description": description,
+        "pictureId": pictureId.replaceFirst(
+            'https://restaurant-api.dicoding.dev/images/medium/', ''),
+        "city": city,
+        "rating": rating.toDouble(),
+        "categories": [],
+        "menus": Menus(foods: [], drinks: []),
+      };
 
   factory RestaurantDetail.fromRestaurant(Restaurant restaurant) =>
       RestaurantDetail(

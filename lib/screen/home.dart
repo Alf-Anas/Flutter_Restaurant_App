@@ -8,9 +8,22 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text(StrList.listRestaurant),
-        ),
-        body: const ListPage());
+      appBar: AppBar(
+        title: const Text(StrList.listRestaurant),
+        actions: [
+          IconButton(
+              icon: const Icon(Icons.star_border),
+              onPressed: () {
+                Navigator.of(context).pushNamed(RouteList.favorite);
+              }),
+          IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                Navigator.of(context).pushNamed(RouteList.setting);
+              }),
+        ],
+      ),
+      body: const ListPage(),
+    );
   }
 }
